@@ -3,6 +3,20 @@
 @push('css')
     <style>
         #mapid { height: 500px; }
+        .btn-float {
+            position: fixed;
+            bottom: -4px;
+            right: 10px;
+            margin-bottom: 40px;
+            margin-right: 20px;
+        }
+        .btn-cricle {
+            border-radius: 50%;
+            color: #fff;
+            display: inline-block;
+            text-align: center;
+            padding: 0.375rem;
+        }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js'></script>
@@ -40,7 +54,7 @@
                                 <input type="text" readonly class="form-control" id="marker-desa" placeholder="Koordinat Desa">
                                 <div class="input-group-prepend">
                                     <div class="input-group-text">
-                                        <a href="#"><i class="fas fa-map-marker-alt"></i></a>
+                                        <a href="javascript:void(0)" id="set-koordinat"><i class="fas fa-map-marker-alt"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -62,6 +76,9 @@
             </div>
         </div>
     </div>
+    <div class="btn-float">
+        <button class="btn rounded-pill btn-primary btn-lg"><i class="fas fa-plus"></i> Tambah</button>
+    </div>
 @endsection
 @push('js')
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
@@ -82,8 +99,47 @@
             }
         });
 
+        mymap.on('zoomend', function() {
+            let zoom = mymap.getZoom();
+            $('#zoom').val(zoom);
+        });
+
         mymap.pm.addControls({
             position: 'topleft',
+        });
+
+        $('#set-koordinat').on('click', function(){
+            mymap.pm.enableDraw('Marker', {
+                snappable: true,
+                snapDistance: 20,
+            });
+        });
+
+        $('#color-picker').on('change', function(){
+            var color = $(this).val();
+            mymap.pm.setPathOptions({
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.4,
+            });
+        });
+
+        var line = [];
+
+        mymap.on('pm:drawstart', ({ workingLayer }) => {
+            workingLayer.on('pm:vertexadded', e => {
+                var koordinat = {};
+                koordinat['lat'] = e.latlng.lat;
+                koordinat['lng'] = e.latlng.lng;
+                line.push(
+                    koordinat
+                );
+            });
+        });
+
+        mymap.on('pm:create', e => {
+            console.log(line);
+            $('#batas-desa').val(JSON.stringify(line));
         });
 
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
