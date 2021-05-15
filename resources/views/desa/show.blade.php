@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Tambah Desa')
+@section('title', 'Detail Desa')
 @push('css')
     <style>
         #mapid { height: 500px; }
@@ -24,7 +24,15 @@
     <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
 @endpush
 @section('content')
-    <h1 class="h3 mb-2 text-gray-800">Tambah Desa</h1>
+    <h1 class="h3 mb-2 text-gray-800">Edit Desa</h1>
+    @if($message = Session::get('success'))
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{ $message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
     <div class="row">
         <div class="col-md-8 col-12">
             <div class="card shadow">
@@ -42,16 +50,16 @@
                     <h6 class="m-0 font-weight-bold text-primary">Data Desa</h6>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('desa.store') }}" method="POST" id="form-submit">
+                    <form action="{{ route('desa.update', $desa->id) }}" method="POST" id="form-submit">
                         @csrf
                         <div class="form-group">
                             <label for="">Nama Desa</label>
-                            <input type="text" class="form-control" name="nama_desa" placeholder="Masukkan nama desa">
+                            <input type="text" class="form-control" name="nama_desa" value="{{ old('nama_desa') ?? $desa->nama_desa }}" placeholder="Masukkan nama desa">
                         </div>
                         <div class="form-group">
                             <label for="">Koordinat Desa</label>
                             <div class="input-group mb-2 mr-sm-2">
-                                <input type="text" readonly class="form-control" name="marker_desa" id="marker-desa" placeholder="Koordinat Desa">
+                                <input type="text" readonly class="form-control" name="marker_desa" value="{{ $desa->marker_desa }}" id="marker-desa" placeholder="Koordinat Desa">
                                 <div class="input-group-prepend">
                                     <div class="input-group-text">
                                         <a href="javascript:void(0)" id="set-koordinat"><i class="fas fa-map-marker-alt"></i></a>
@@ -61,15 +69,15 @@
                         </div>
                         <div class="form-group">
                             <label for="">Zoom</label>
-                            <input type="number" readonly class="form-control" name="zoom" value="" min="1" id="zoom">
+                            <input type="number" readonly class="form-control" name="zoom" value="{{ $desa->zoom }}" min="1" id="zoom">
                         </div>
                         <div class="form-group">
                             <label for="">Warna Batas</label>
-                            <input type="color" class="form-control" name="warna_batas" value="#4e73df" id="color-picker">
+                            <input type="color" class="form-control" name="warna_batas" value="{{ $desa->warna_batas_desa ?? '#4e73df' }}" id="color-picker">
                         </div>
                         <div class="form-group">
                             <label for="">Batas Desa</label>
-                            <textarea name="batas_desa" id="batas-desa" cols="30" rows="4" readonly class="form-control"></textarea>
+                            <textarea name="batas_desa" id="batas-desa" cols="30" rows="4" readonly class="form-control">{{ $desa->batas_desa }}</textarea>
                         </div>
                     </form>
                 </div>
@@ -77,14 +85,14 @@
         </div>
     </div>
     <div class="btn-float">
-        <button class="btn rounded-pill btn-primary btn-lg" id="btn-submit"><i class="fas fa-plus"></i> Tambah</button>
+        <button class="btn rounded-pill btn-warning btn-lg" id="btn-submit"><i class="fas fa-edit"></i> Update</button>
     </div>
 @endsection
 @push('js')
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
     <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
     <script>
-        var mymap = L.map('mapid').setView([-8.375319619905975, 115.18006704436591], 9);
+        var mymap = L.map('mapid').setView({{ $desa->marker_desa }}, {{ $desa->zoom }});
         L.Map.include({
             getMarkerById: function (id) {
                 var marker = null;
@@ -96,6 +104,17 @@
                     }
                 });
                 return marker;
+            },
+            getPolyGonById: function (id) {
+                var polygon = null;
+                this.eachLayer(function (layer) {
+                    if (layer instanceof L.Polygon) {
+                        if (layer.options.id === id) {
+                            polygon = layer;
+                        }
+                    }
+                });
+                return polygon;
             }
         });
 
@@ -109,14 +128,17 @@
         });
 
         $('#set-koordinat').on('click', function(){
-            mymap.pm.enableDraw('Marker', {
-                snappable: true,
-                snapDistance: 20,
-            });
+            mymap.pm.enableGlobalDragMode();
         });
 
         $('#color-picker').on('change', function(){
             var color = $(this).val();
+            polygon = mymap.getPolyGonById({{ $desa->id }});
+            polygon.setStyle({
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.4,
+            });
             mymap.pm.setPathOptions({
                 color: color,
                 fillColor: color,
@@ -162,14 +184,76 @@
 
         $(document).ready(function(){
             $('#desa').addClass('active');
-            $('#zoom').val(mymap.getZoom());
             let color = $('#color-picker').val();
             mymap.pm.setPathOptions({
                 color: color,
                 fillColor: color,
                 fillOpacity: 0.4,
             });
+            readLine('{{ $desa->id }}');
         });
+
+        function readLine(id) {
+            let url = '/admin/desa/get-batas-desa/'+id;
+            $.ajax({
+                url : url,
+                method : 'GET',
+                success : function(response) {
+                    var koor = jQuery.parseJSON(response.desa['batas_desa']);
+                    var pathCoords = connectTheDots(koor);
+                    var pathLine = L.polygon(pathCoords, {
+                        id: response.desa['id'],
+                        color: response.desa['warna_batas_desa'],
+                        fillColor: response.desa['warna_batas_desa'],
+                        fillOpacity: 0.4,
+                    }).addTo(mymap);
+                    var marker = L.marker({{ $desa->marker_desa }}).addTo(mymap)
+                        .bindPopup(response.desa['nama_desa']);
+                    marker.on('click', function() {
+                        marker.openPopup();
+                    });
+                    onUpdatePM(pathLine);
+                    onDragMarker(marker);
+                    return pathLine;
+                }
+            });
+        }
+
+        function onDragMarker(marker) {
+            marker.on('pm:dragend', e => {
+                let koordinat_desa = "["+e.target._latlng.lat+", "+e.target._latlng.lng+"]";
+                $('#marker-desa').val(koordinat_desa);
+            });
+        }
+
+        function onUpdatePM(line) {
+            line.on('pm:update', e => {
+                var id = e.layer.options.id;
+                var koordinats = e.layer._latlngs;
+                let koordinat = {};
+                line = []
+                koordinats.forEach(function(latlng){
+                    koordinat['lat'] = latlng.lat;
+                    koordinat['lng'] = latlng.lng;
+                    line.push({
+                        lat: latlng.lat,
+                        lng: latlng.lng
+                    });
+                });
+                $('#batas-desa').val(JSON.stringify(line));
+                // updateLine(id, line);
+            });
+        }
+
+        function connectTheDots(data){
+            var c = [];
+            for(i in data) {
+                var x = data[i]['lat'];
+                var y = data[i]['lng'];
+                c.push([x, y]);
+            }
+            return c;
+        }
 
         $('#btn-submit').on('click', function(){
             $('#form-submit').submit();

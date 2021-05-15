@@ -49,11 +49,38 @@
                                 <td>{{ $item->nama_desa }}</td>
                                 <td>{{ $item->marker_desa }}</td>
                                 <td>{{ $item->warna_batas_desa }}</td>
-                                <td>Lihat</td>
+                                <td>
+                                    <a href="{{ route('desa.show', $item->id) }}" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>
+                                    <button class="btn btn-sm btn-danger" onclick="destroy('{{ $item->id }}')"><i class="fas fa-trash"></i></button>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="delete-modal-label"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Hapus Data</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ route('desa.delete') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="id" id="id-delete">
+                    Data yang dihapus tidak akan bisa dikembalikan.
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <button class="btn btn-danger" type="submit">Hapus</a>
+                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -68,5 +95,9 @@
         $(document).ready(function(){
             $('#desa').addClass('active');
         });
+        function destroy(id) {
+            $('#id-delete').val(id);
+            $('#delete-modal').modal('show');
+        }
     </script>
 @endpush

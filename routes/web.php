@@ -23,6 +23,11 @@ Route::get('/test', function () {
 //Desa
 Route::get('/admin/desa/home', 'DesaController@index')->name('desa.home');
 Route::get('/admin/desa/create', 'DesaController@create')->name('desa.create');
+Route::post('/admin/desa/store', 'DesaController@store')->name('desa.store');
+Route::get('/admin/desa/show/{id}', 'DesaController@show')->name('desa.show');
+Route::get('/admin/desa/get-batas-desa/{id}', 'DesaController@readBatasDesa')->name('desa.get_batas_desa');
+Route::post('/admin/desa/update/{id}', 'DesaController@update')->name('desa.update');
+Route::post('/admin/desa/delete', 'DesaController@delete')->name('desa.delete');
 
 //Agama
 Route::get('/admin/agama/home', 'AgamaController@index')->name('agama.home');
