@@ -35,3 +35,17 @@ Route::post('/admin/agama/store', 'AgamaController@store')->name('agama.store');
 Route::get('/admin/agama/edit/{id}', 'AgamaController@edit')->name('agama.edit');
 Route::post('/admin/agama/update/{id}', 'AgamaController@update')->name('agama.update');
 Route::post('/admin/agama/delete', 'AgamaController@delete')->name('agama.delete');
+
+//Map
+Route::get('/admin/map/home', 'MapController@index')->name('map.home');
+Route::get('/admin/map/get-desa', 'MapController@getAllDesa')->name('map.get_all_desa');
+Route::get('/admin/map/get-potensi', 'MapController@getDataPotensi')->name('map.get_sumber_desa');
+
+//Sumber Air
+Route::post('/admin/sumber-air/store', 'SumberAirController@store')->name('sumber_air.store');
+Route::get('/admin/sumber-air/show/{id}', 'SumberAirController@show')->name('sumber_air.show');
+Route::post('/admin/sumber-air/update/{id}', 'SumberAirController@update')->name('sumber_air.update');
+Route::post('/admin/sumber-air/update-koordinat/{id}', 'SumberAirController@updateKoordinat')->name('sumber_air.update_koordinat');
+
+//Sekolah
+Route::post('/admin/sekolah/store', 'SekolahController@store')->name('sekolah.store');

@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <title>Potensi Desa | @yield('title')</title>
 
@@ -67,8 +68,8 @@
                     <span>Desa</span></a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="#">
+            <li class="nav-item" id="map">
+                <a class="nav-link" href="{{ route('map.home') }}">
                     <i class="fas fa-map-marked-alt"></i>
                     <span>Map</span></a>
             </li>
