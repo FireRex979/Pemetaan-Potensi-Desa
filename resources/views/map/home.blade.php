@@ -166,6 +166,110 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="edit-modal-sekolah" tabindex="-1" role="dialog" aria-labelledby="add-modal-label"
+        aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="add-modal-label">Edit Data Sekolah</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="" id="form-update-sekolah" method="POST">
+                    @csrf
+                    <div class="form-group">
+                        <label for="">Nama Sekolah</label>
+                        <input type="text" class="form-control" id="nama-sekolah" required name="nama_sekolah" placeholder="Masukkan sekolah">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Jenis Sekolah</label>
+                        <select name="jenis" required class="form-control" id="jenis-sekolah">
+                            <option value="swasta">Swasta</option>
+                            <option value="negeri">Negeri</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Tingkat Sekolah</label>
+                        <select name="tingkat" required class="form-control" id="tingkat-sekolah">
+                            <option value="TK">TK</option>
+                            <option value="SD">SD</option>
+                            <option value="SMP">SMP</option>
+                            <option value="SMA">SMA</option>
+                            <option value="SMK">SMK</option>
+                            <option value="Universitas">Universitas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Latitude</label>
+                        <input type="text" class="form-control lat" readonly required name="lat" id="lat-sekolah">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Longtitude</label>
+                        <input type="text" class="form-control lng" readonly required name="lng" id="lng-sekolah">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Alamat</label>
+                        <textarea name="alamat" placeholder="Masukkan alamat sekolah" required class="form-control" cols="30" rows="10" id="alamat-sekolah"></textarea>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="delete-modal-sekolah" tabindex="-1" role="dialog" aria-labelledby="delete-modal-label"
+        aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Hapus Data Sekolah</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('sekolah.delete') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="id" id="id-sekolah-delete">
+                Data yang dihapus tidak akan bisa dikembalikan.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" type="submit">Hapus</a>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="delete-modal-sumber-air" tabindex="-1" role="dialog" aria-labelledby="delete-modal-label"
+        aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Hapus Data Sumber Air</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('sumber_air.delete') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="id" id="id-sumber-air-delete">
+                Data yang dihapus tidak akan bisa dikembalikan.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" type="submit">Hapus</a>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @push('js')
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
@@ -257,7 +361,7 @@
                      '<hr style="margin-top : -15px;">'+
                      '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Debit Sumber Air : '+potensi['debit']+' lt/detik</span></small></p>'+
                      '<p style="margin-top : -15px;"><small> <i class="fas fa-user-tie"></i> <span>Pengelola : '+potensi['pengelola']+'</span></small></p>'+
-                     '<button class="btn btn-sm mr-1 btn-warning" onclick="editSumberAir('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;"><i class="fas fa-edit"></i></button><button style="font-size : 8px; padding : 4px 8px;" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>';
+                     '<button class="btn btn-sm mr-1 btn-warning" onclick="editSumberAir('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;"><i class="fas fa-edit"></i></button><button onclick="deleteSumberAir('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>';
 
         var marker = L.marker([potensi['lat'], potensi['lng']], {
             icon: iconSumberAir,
@@ -269,15 +373,16 @@
     function createMarkerSekolah(potensi) {
         let pop_up = '<p><strong>'+potensi['nama_sekolah']+'</strong><p>'+
                      '<hr style="margin-top : -15px;">'+
-                     '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Debit Jenis Sekolah : '+potensi['jenis']+' lt/detik</span></small></p>'+
+                     '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Jenis Sekolah : '+potensi['jenis']+'</span></small></p>'+
                      '<p style="margin-top : -15px;"><small> <i class="fas fa-user-tie"></i> <span>Tingkat : '+potensi['tingkat']+'</span></small></p>'+
-                     '<button class="btn btn-sm mr-1 btn-warning" onclick="editSumberAir('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;"><i class="fas fa-edit"></i></button><button style="font-size : 8px; padding : 4px 8px;" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>';
+                     '<p style="margin-top : -15px;"><small> <i class="fas fa-user-tie"></i> <span>Alamat : '+potensi['alamat']+'</span></small></p>'+
+                     '<button class="btn btn-sm mr-1 btn-warning" onclick="editSekolah('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;"><i class="fas fa-edit"></i></button><button onclick="deleteSekolah('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>';
 
         var marker = L.marker([potensi['lat'], potensi['lng']], {
             icon: iconSekolah,
             id : potensi['id']
         }).addTo(mymap).bindPopup(pop_up);
-        // onDragMarkerSumberAir(marker);
+        onDragMarkerSekolah(marker);
     }
 
     function onDragMarkerSumberAir(marker) {
@@ -286,6 +391,26 @@
             let lat = e.target._latlng.lat;
             let lng = e.target._latlng.lng;
             let url = '/admin/sumber-air/update-koordinat/'+id;
+            $.ajax({
+                url : url,
+                method : 'POST',
+                data : {
+                    lat : lat,
+                    lng : lng
+                },
+                success : function (response) {
+                    console.log('Sukses Mengganti Koordinat Marker');
+                }
+            });
+        });
+    }
+
+    function onDragMarkerSekolah(marker) {
+        marker.on('pm:dragend', e => {
+            let id = e.target.options.id;
+            let lat = e.target._latlng.lat;
+            let lng = e.target._latlng.lng;
+            let url = '/admin/sekolah/update-koordinat/'+id;
             $.ajax({
                 url : url,
                 method : 'POST',
@@ -358,6 +483,35 @@
                 $('#edit-modal-sumber-air').modal('show');
             }
         });
+    }
+
+    function editSekolah(id) {
+        let url = '/admin/sekolah/show/'+id;
+        let link = '/admin/sekolah/update/'+id;
+        $.ajax({
+            url : url,
+            method : 'GET',
+            success : function(response) {
+                $('#nama-sekolah').val(response.data['nama_sekolah']);
+                $('#jenis-sekolah option[value='+response.data['jenis']+']').prop('selected', true);
+                $('#tingkat-sekolah option[value='+response.data['tingkat']+']').prop('selected', true);
+                $('#lat-sekolah').val(response.data['lat']);
+                $('#lng-sekolah').val(response.data['lng']);
+                $('#alamat-sekolah').val(response.data['alamat']);
+                $('#form-update-sekolah').prop('action', link);
+                $('#edit-modal-sekolah').modal('show');
+            }
+        })
+    }
+
+    function deleteSekolah(id) {
+        $('#id-sekolah-delete').val(id);
+        $('#delete-modal-sekolah').modal('show');
+    }
+
+    function deleteSumberAir(id) {
+        $('#id-sumber-air-delete').val(id);
+        $('#delete-modal-sumber-air').modal('show');
     }
 
     function connectTheDots(data){

@@ -46,6 +46,11 @@ Route::post('/admin/sumber-air/store', 'SumberAirController@store')->name('sumbe
 Route::get('/admin/sumber-air/show/{id}', 'SumberAirController@show')->name('sumber_air.show');
 Route::post('/admin/sumber-air/update/{id}', 'SumberAirController@update')->name('sumber_air.update');
 Route::post('/admin/sumber-air/update-koordinat/{id}', 'SumberAirController@updateKoordinat')->name('sumber_air.update_koordinat');
+Route::post('/admin/sumber-air/delete', 'SumberAirController@delete')->name('sumber_air.delete');
 
 //Sekolah
 Route::post('/admin/sekolah/store', 'SekolahController@store')->name('sekolah.store');
+Route::get('/admin/sekolah/show/{id}', 'SekolahController@show')->name('sekolah.show');
+Route::post('/admin/sekolah/update/{id}', 'SekolahController@update')->name('sekolah.update');
+Route::post('/admin/sekolah/update-koordinat/{id}', 'SekolahController@updateKoordinat')->name('sekolah.update_koordinat');
+Route::post('/admin/sekolah/delete', 'SekolahController@delete')->name('sekolah.delete');

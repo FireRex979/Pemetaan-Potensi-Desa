@@ -48,4 +48,12 @@ class SumberAirController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function delete(Request $request)
+    {
+        $sumber_air = SumberAir::find($request->id);
+        $sumber_air->delete();
+
+        return redirect()->back()->with(['success' => 'Potensi berhasil diupdate']);
+    }
 }
