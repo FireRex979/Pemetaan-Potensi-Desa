@@ -54,3 +54,10 @@ Route::get('/admin/sekolah/show/{id}', 'SekolahController@show')->name('sekolah.
 Route::post('/admin/sekolah/update/{id}', 'SekolahController@update')->name('sekolah.update');
 Route::post('/admin/sekolah/update-koordinat/{id}', 'SekolahController@updateKoordinat')->name('sekolah.update_koordinat');
 Route::post('/admin/sekolah/delete', 'SekolahController@delete')->name('sekolah.delete');
+
+//Tempat Ibadah
+Route::post('/admin/tempat-ibadah/store', 'TempatIbadahController@store')->name('tempat_ibadah.store');
+Route::get('/admin/tempat-ibadah/show/{id}', 'TempatIbadahController@show')->name('tempat_ibadah.show');
+Route::post('/admin/tempat-ibadah/update/{id}', 'TempatIbadahController@update')->name('tempat_ibadah.update');
+Route::post('/admin/tempat-ibadah/delete', 'TempatIbadahController@delete')->name('tempat_ibadah.delete');
+Route::post('/admin/tempat-ibadah/update-koordinat/{id}', 'TempatIbadahController@updateKoordinat')->name('tempat_ibadah.update_koordinat');

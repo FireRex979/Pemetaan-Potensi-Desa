@@ -222,6 +222,99 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="add-modal-tempat-ibadah" tabindex="-1" role="dialog" aria-labelledby="add-modal-label"
+        aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="add-modal-label">Tambah Data Tempat Ibadah</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('tempat_ibadah.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" value="3" name="potensi_id">
+                    <div class="form-group">
+                        <label for="">Nama Tempat Ibadah</label>
+                        <input type="text" class="form-control" required name="nama_tempat_ibadah" placeholder="Masukkan tempat ibadah">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Agama</label>
+                        <select name="agama_id" required class="form-control">
+                            @foreach ($agama as $item)
+                                <option value="{{ $item->id }}">{{ $item->agama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Latitude</label>
+                        <input type="text" class="form-control lat" readonly required name="lat" id="lat-sekolah">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Longtitude</label>
+                        <input type="text" class="form-control lng" readonly required name="lng" id="lng-sekolah">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Alamat</label>
+                        <textarea name="alamat" placeholder="Masukkan alamat tempat ibadah" required class="form-control" cols="30" rows="10"></textarea>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="edit-modal-tempat-ibadah" tabindex="-1" role="dialog" aria-labelledby="add-modal-label"
+        aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="add-modal-label">Edit Data Tempat Ibadah</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="" id="form-update-tempat-ibadah" method="POST">
+                    @csrf
+                    <div class="form-group">
+                        <label for="">Nama Tempat Ibadah</label>
+                        <input type="text" class="form-control" required name="nama_tempat_ibadah" id="nama-tempat-ibadah" placeholder="Masukkan tempat ibadah">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Agama</label>
+                        <select name="agama_id" required class="form-control" id="agama-id">
+                            @foreach ($agama as $item)
+                                <option value="{{ $item->id }}">{{ $item->agama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Latitude</label>
+                        <input type="text" class="form-control lat" readonly required name="lat" id="lat-tempat-ibadah">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Longtitude</label>
+                        <input type="text" class="form-control lng" readonly required name="lng" id="lng-tempat-ibadah">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Alamat</label>
+                        <textarea name="alamat" placeholder="Masukkan alamat tempat ibadah" id="alamat-tempat-ibadah" required class="form-control" cols="30" rows="10"></textarea>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="delete-modal-sekolah" tabindex="-1" role="dialog" aria-labelledby="delete-modal-label"
         aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -260,6 +353,30 @@
                 <form action="{{ route('sumber_air.delete') }}" method="POST">
                     @csrf
                     <input type="hidden" name="id" id="id-sumber-air-delete">
+                Data yang dihapus tidak akan bisa dikembalikan.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" type="submit">Hapus</a>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="delete-modal-tempat-ibadah" tabindex="-1" role="dialog" aria-labelledby="delete-modal-label"
+        aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Hapus Data Sumber Air</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('tempat_ibadah.delete') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="id" id="id-tempat-ibadah-delete">
                 Data yang dihapus tidak akan bisa dikembalikan.
             </div>
             <div class="modal-footer">
@@ -334,6 +451,9 @@
                 for(let i = 0; i< response.sekolah.length; i++) {
                     createMarkerSekolah(response.sekolah[i]);
                 }
+                for(let i = 0; i< response.tempat_ibadah.length; i++) {
+                    createMarkerTempatIbadah(response.tempat_ibadah[i]);
+                }
             }
         });
     }
@@ -349,6 +469,15 @@
 
     var iconSekolah = L.icon({
         iconUrl: '/assets/img/school.png',
+        iconSize:     [24, 24], // size of the icon
+        shadowSize:   [8, 8], // size of the shadow
+        iconAnchor:   [16, 16], // point of the icon which will correspond to marker's location
+        shadowAnchor: [4, 62],  // the same for the shadow
+        popupAnchor:  [0, -12] // point from which the popup should open relative to the iconAnchor
+    });
+
+    var iconTempatIbadah = L.icon({
+        iconUrl: '/assets/img/shinto.png',
         iconSize:     [24, 24], // size of the icon
         shadowSize:   [8, 8], // size of the shadow
         iconAnchor:   [16, 16], // point of the icon which will correspond to marker's location
@@ -383,6 +512,20 @@
             id : potensi['id']
         }).addTo(mymap).bindPopup(pop_up);
         onDragMarkerSekolah(marker);
+    }
+
+    function createMarkerTempatIbadah(potensi) {
+        let pop_up = '<p><strong>'+potensi['nama_tempat_ibadah']+'</strong><p>'+
+                     '<hr style="margin-top : -15px;">'+
+                     '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Agama : '+potensi['agama']+'</span></small></p>'+
+                     '<p style="margin-top : -15px;"><small> <i class="fas fa-user-tie"></i> <span>Alamat : '+potensi['alamat']+'</span></small></p>'+
+                     '<button class="btn btn-sm mr-1 btn-warning" onclick="editTempatIbadah('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;"><i class="fas fa-edit"></i></button><button onclick="deleteTempatIbadah('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>';
+
+        var marker = L.marker([potensi['lat'], potensi['lng']], {
+            icon: iconTempatIbadah,
+            id : potensi['id']
+        }).addTo(mymap).bindPopup(pop_up);
+        onDragMarkerTempatIbadah(marker);
     }
 
     function onDragMarkerSumberAir(marker) {
@@ -425,6 +568,27 @@
         });
     }
 
+    function onDragMarkerTempatIbadah(marker) {
+        marker.on('pm:dragend', e => {
+            let id = e.target.options.id;
+            console.log(e);
+            let lat = e.target._latlng.lat;
+            let lng = e.target._latlng.lng;
+            let url = '/admin/tempat-ibadah/update-koordinat/'+id;
+            $.ajax({
+                url : url,
+                method : 'POST',
+                data : {
+                    lat : lat,
+                    lng : lng
+                },
+                success : function (response) {
+                    console.log('Sukses Mengganti Koordinat Marker');
+                }
+            });
+        });
+    }
+
     function createPolygon(desa) {
         var koor = jQuery.parseJSON(desa['batas_desa']);
         var pathCoords = connectTheDots(koor);
@@ -443,7 +607,7 @@
                         '<a href="#" class="mr-2" title="Tambah Sumber Air" onclick="createSumberAir()">'+
                             '<img src="/assets/img/waterfall.png" width="32" alt="">'+
                         '</a>'+
-                        '<a href="#" class="mr-2" title="Tambah Tempat Ibadah">'+
+                        '<a href="#" class="mr-2" title="Tambah Tempat Ibadah" onclick="createTempatIbadah()">'+
                             '<img src="/assets/img/shinto.png" width="32" alt="">'+
                         '</a>'+
                     '</div>';
@@ -456,15 +620,16 @@
 
     }
 
-    //Sekolah
     function createSekolah() {
         $('#add-modal-sekolah').modal('show');
     }
 
-    //Sumber Air
-
     function createSumberAir() {
         $('#add-modal-sumber-air').modal('show');
+    }
+
+    function createTempatIbadah() {
+        $('#add-modal-tempat-ibadah').modal('show');
     }
 
     function editSumberAir(id) {
@@ -501,6 +666,24 @@
                 $('#form-update-sekolah').prop('action', link);
                 $('#edit-modal-sekolah').modal('show');
             }
+        });
+    }
+
+    function editTempatIbadah(id) {
+        let url = '/admin/tempat-ibadah/show/'+id;
+        let link = '/admin/tempat-ibadah/update/'+id;
+        $.ajax({
+            url : url,
+            method : 'GET',
+            success : function(response) {
+                $('#nama-tempat-ibadah').val(response.data['nama_tempat_ibadah']);
+                $('#agama-id option[value='+response.data['agama_id']+']').prop('selected', true);
+                $('#lat-tempat-ibadah').val(response.data['lat']);
+                $('#lng-tempat-ibadah').val(response.data['lng']);
+                $('#alamat-tempat-ibadah').val(response.data['alamat']);
+                $('#form-update-tempat-ibadah').prop('action', link);
+                $('#edit-modal-tempat-ibadah').modal('show');
+            }
         })
     }
 
@@ -512,6 +695,11 @@
     function deleteSumberAir(id) {
         $('#id-sumber-air-delete').val(id);
         $('#delete-modal-sumber-air').modal('show');
+    }
+
+    function deleteTempatIbadah(id) {
+        $('#id-tempat-ibadah-delete').val(id);
+        $('#delete-modal-tempat-ibadah').modal('show');
     }
 
     function connectTheDots(data){
