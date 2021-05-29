@@ -11,6 +11,14 @@
 @endpush
 @section('content')
 <h1 class="h3 mb-2 text-gray-800">Manajemen Map</h1>
+@if($message = Session::get('success'))
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{ $message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+@endif
 <div class="row">
     <div class="col-md-12 col-12">
         <div class="card shadow">
@@ -431,12 +439,17 @@
             url : url,
             method : 'GET',
             success : function(response) {
-                // console.log(response.desa);
                 for (let i = 0; i < response.desa.length; i++) {
                     createPolygon(response.desa[i]);
+                    createMarkerDesa(response.desa[i]);
                 }
             }
         });
+    }
+
+    function createMarkerDesa(desa) {
+        let latlng = JSON.parse(desa['marker_desa']);
+        var marker = L.marker([latlng[0], latlng[1]]).addTo(mymap).bindPopup(desa['nama_desa']);
     }
 
     function getAllPotensi() {

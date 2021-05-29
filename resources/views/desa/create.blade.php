@@ -163,6 +163,7 @@
         $(document).ready(function(){
             $('#desa').addClass('active');
             $('#zoom').val(mymap.getZoom());
+            getAllDesa();
             let color = $('#color-picker').val();
             mymap.pm.setPathOptions({
                 color: color,
@@ -170,6 +171,44 @@
                 fillOpacity: 0.4,
             });
         });
+
+        function getAllDesa() {
+            let url = '{{ route("map.get_all_desa") }}';
+            $.ajax({
+                url : url,
+                method : 'GET',
+                success : function(response) {
+                    // console.log(response.desa);
+                    for (let i = 0; i < response.desa.length; i++) {
+                        createPolygon(response.desa[i]);
+                    }
+                }
+            });
+        }
+
+        function createPolygon(desa) {
+            var koor = jQuery.parseJSON(desa['batas_desa']);
+            var pathCoords = connectTheDots(koor);
+            var pathLine = L.polygon(pathCoords, {
+                id: desa['id'],
+                color: desa['warna_batas_desa'],
+                fillColor: desa['warna_batas_desa'],
+                fillOpacity: 0.4,
+            }).addTo(mymap);
+
+            pathLine.bindPopup(desa['nama_desa']);
+
+        }
+
+        function connectTheDots(data){
+            var c = [];
+            for(i in data) {
+                var x = data[i]['lat'];
+                var y = data[i]['lng'];
+                c.push([x, y]);
+            }
+            return c;
+        }
 
         $('#btn-submit').on('click', function(){
             $('#form-submit').submit();

@@ -191,6 +191,7 @@
                 fillOpacity: 0.4,
             });
             readLine('{{ $desa->id }}');
+            getAllDesa();
         });
 
         function readLine(id) {
@@ -219,6 +220,36 @@
             });
         }
 
+        function getAllDesa() {
+            let url = '{{ route("map.get_all_desa") }}';
+            $.ajax({
+                url : url,
+                method : 'GET',
+                success : function(response) {
+                    // console.log(response.desa);
+                    for (let i = 0; i < response.desa.length; i++) {
+                        if (response.desa[i]['id'] != '{{ $desa->id }}') {
+                            createPolygon(response.desa[i]);
+                        }
+                    }
+                }
+            });
+        }
+
+        function createPolygon(desa) {
+            var koor = jQuery.parseJSON(desa['batas_desa']);
+            var pathCoords = connectTheDots(koor);
+            var pathLine = L.polygon(pathCoords, {
+                id: desa['id'],
+                color: desa['warna_batas_desa'],
+                fillColor: desa['warna_batas_desa'],
+                fillOpacity: 0.4,
+            }).addTo(mymap);
+
+            pathLine.bindPopup(desa['nama_desa']);
+
+        }
+
         function onDragMarker(marker) {
             marker.on('pm:dragend', e => {
                 let koordinat_desa = "["+e.target._latlng.lat+", "+e.target._latlng.lng+"]";
@@ -244,6 +275,8 @@
                 // updateLine(id, line);
             });
         }
+
+
 
         function connectTheDots(data){
             var c = [];
