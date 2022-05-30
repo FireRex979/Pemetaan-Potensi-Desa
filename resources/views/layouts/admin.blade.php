@@ -74,12 +74,6 @@
                     <span>Manajemen Map</span></a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link" target="_blank" href="{{ route('map') }}">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <span>Preview Map</span></a>
-            </li>
-
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 

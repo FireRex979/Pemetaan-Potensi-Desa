@@ -94,6 +94,7 @@
     <script>
         var mymap = L.map('mapid').setView({{ $desa->marker_desa }}, {{ $desa->zoom }});
         L.Map.include({
+            //include function in mymap for get Marker by id
             getMarkerById: function (id) {
                 var marker = null;
                 this.eachLayer(function (layer) {
@@ -105,6 +106,7 @@
                 });
                 return marker;
             },
+            //include function in mymap for get Polygon by id
             getPolyGonById: function (id) {
                 var polygon = null;
                 this.eachLayer(function (layer) {
@@ -115,22 +117,44 @@
                     }
                 });
                 return polygon;
+            },
+            //include function in mymap for disable edit mode in no polygon selected
+            disableEditMode: function (id) {
+                this.eachLayer(function (layer) {
+                    if (layer instanceof L.Polygon) {
+                        if (layer.options.id !== id) {
+                            layer.pm.disable();
+                        }
+                    }
+                });
             }
         });
 
+        //when map zoom in or zoom out
         mymap.on('zoomend', function() {
             let zoom = mymap.getZoom();
             $('#zoom').val(zoom);
         });
 
+        //setup geoman
         mymap.pm.addControls({
             position: 'topleft',
+            drawMarker: false,
+            drawCircleMarker: false,
+            drawPolyline: false,
+            drawRectangle: false,
+            drawCircle: false,
+            cutPolygon: false,
+            removalMode: false,
+            pinningOption: false,
         });
 
+        //when marker drag
         $('#set-koordinat').on('click', function(){
             mymap.pm.enableGlobalDragMode();
         });
 
+        //when color is change
         $('#color-picker').on('change', function(){
             var color = $(this).val();
             polygon = mymap.getPolyGonById({{ $desa->id }});
@@ -146,8 +170,8 @@
             });
         });
 
+        //when start drawing
         var line = [];
-
         mymap.on('pm:drawstart', ({ workingLayer }) => {
             workingLayer.on('pm:vertexadded', e => {
                 var koordinat = {};
@@ -173,6 +197,11 @@
             }
         });
 
+        //when edit mode on
+        mymap.on('pm:globaleditmodetoggled', e => {
+            polygon = mymap.disableEditMode({{ $desa->id }});
+        });
+
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
             maxZoom: 18,
@@ -182,6 +211,7 @@
             accessToken: 'pk.eyJ1IjoiZmlyZXJleDk3OSIsImEiOiJja2dobG1wanowNTl0MzNwY3Fld2hpZnJoIn0.YRQqomJr_RmnW3q57oNykw'
         }).addTo(mymap);
 
+        //if page is totally loaded
         $(document).ready(function(){
             $('#desa').addClass('active');
             let color = $('#color-picker').val();
@@ -192,8 +222,10 @@
             });
             readLine('{{ $desa->id }}');
             getAllDesa();
+
         });
 
+        //read koordinate desa selected
         function readLine(id) {
             let url = '/admin/desa/get-batas-desa/'+id;
             $.ajax({
@@ -207,6 +239,7 @@
                         color: response.desa['warna_batas_desa'],
                         fillColor: response.desa['warna_batas_desa'],
                         fillOpacity: 0.4,
+                        nonedit: false
                     }).addTo(mymap);
                     var marker = L.marker({{ $desa->marker_desa }}).addTo(mymap)
                         .bindPopup(response.desa['nama_desa']);
@@ -220,13 +253,13 @@
             });
         }
 
+        //get all desa's data fron db
         function getAllDesa() {
             let url = '{{ route("map.get_all_desa") }}';
             $.ajax({
                 url : url,
                 method : 'GET',
                 success : function(response) {
-                    // console.log(response.desa);
                     for (let i = 0; i < response.desa.length; i++) {
                         if (response.desa[i]['id'] != '{{ $desa->id }}') {
                             createPolygon(response.desa[i]);
@@ -236,20 +269,18 @@
             });
         }
 
+        //build polygon
         function createPolygon(desa) {
             var koor = jQuery.parseJSON(desa['batas_desa']);
             var pathCoords = connectTheDots(koor);
             var pathLine = L.polygon(pathCoords, {
                 id: desa['id'],
-                color: desa['warna_batas_desa'],
-                fillColor: desa['warna_batas_desa'],
-                fillOpacity: 0.4,
+                nonedit:true,
             }).addTo(mymap);
-
             pathLine.bindPopup(desa['nama_desa']);
-
         }
 
+        //on marker drag
         function onDragMarker(marker) {
             marker.on('pm:dragend', e => {
                 let koordinat_desa = "["+e.target._latlng.lat+", "+e.target._latlng.lng+"]";
@@ -257,13 +288,14 @@
             });
         }
 
+        //on polygon in edit mode end
         function onUpdatePM(line) {
             line.on('pm:update', e => {
                 var id = e.layer.options.id;
                 var koordinats = e.layer._latlngs;
                 let koordinat = {};
                 line = []
-                koordinats.forEach(function(latlng){
+                koordinats[0].forEach(function(latlng){
                     koordinat['lat'] = latlng.lat;
                     koordinat['lng'] = latlng.lng;
                     line.push({
@@ -272,12 +304,10 @@
                     });
                 });
                 $('#batas-desa').val(JSON.stringify(line));
-                // updateLine(id, line);
             });
         }
 
-
-
+        //connect koordinate into array
         function connectTheDots(data){
             var c = [];
             for(i in data) {
@@ -288,6 +318,7 @@
             return c;
         }
 
+        //button submit on click
         $('#btn-submit').on('click', function(){
             $('#form-submit').submit();
         });

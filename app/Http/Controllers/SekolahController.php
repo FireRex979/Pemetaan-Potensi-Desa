@@ -11,6 +11,7 @@ class SekolahController extends Controller
     {
         $sekolah = new Sekolah();
         $sekolah->potensi_id = $request->potensi_id;
+        $sekolah->desa_id = $request->id_desa;
         $sekolah->jenis = $request->jenis;
         $sekolah->tingkat = $request->tingkat;
         $sekolah->nama_sekolah = $request->nama_sekolah;

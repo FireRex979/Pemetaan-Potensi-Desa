@@ -12,6 +12,7 @@ class SumberAirController extends Controller
         $sumber_air = new SumberAir();
         $sumber_air->potensi_id = $request->potensi_id;
         $sumber_air->nama_sumber = $request->nama_sumber;
+        $sumber_air->desa_id = $request->id_desa;
         $sumber_air->lat = $request->lat;
         $sumber_air->lng = $request->lng;
         $sumber_air->debit = $request->debit;

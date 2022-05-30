@@ -46,12 +46,12 @@
                         @csrf
                         <div class="form-group">
                             <label for="">Nama Desa</label>
-                            <input type="text" class="form-control" name="nama_desa" placeholder="Masukkan nama desa">
+                            <input type="text" class="form-control" name="nama_desa" required placeholder="Masukkan nama desa">
                         </div>
                         <div class="form-group">
                             <label for="">Koordinat Desa</label>
                             <div class="input-group mb-2 mr-sm-2">
-                                <input type="text" readonly class="form-control" name="marker_desa" id="marker-desa" placeholder="Koordinat Desa">
+                                <input type="text" readonly class="form-control" name="marker_desa" required id="marker-desa" placeholder="Koordinat Desa">
                                 <div class="input-group-prepend">
                                     <div class="input-group-text">
                                         <a href="javascript:void(0)" id="set-koordinat"><i class="fas fa-map-marker-alt"></i></a>
@@ -61,15 +61,15 @@
                         </div>
                         <div class="form-group">
                             <label for="">Zoom</label>
-                            <input type="number" readonly class="form-control" name="zoom" value="" min="1" id="zoom">
+                            <input type="number" readonly class="form-control" name="zoom" value="" required min="1" id="zoom">
                         </div>
                         <div class="form-group">
                             <label for="">Warna Batas</label>
-                            <input type="color" class="form-control" name="warna_batas" value="#4e73df" id="color-picker">
+                            <input type="color" class="form-control" name="warna_batas" required value="#4e73df" id="color-picker">
                         </div>
                         <div class="form-group">
                             <label for="">Batas Desa</label>
-                            <textarea name="batas_desa" id="batas-desa" cols="30" rows="4" readonly class="form-control"></textarea>
+                            <textarea name="batas_desa" id="batas-desa" cols="30" rows="4" required readonly class="form-control"></textarea>
                         </div>
                     </form>
                 </div>
@@ -96,61 +96,19 @@
                     }
                 });
                 return marker;
-            }
-        });
-
-        mymap.on('zoomend', function() {
-            let zoom = mymap.getZoom();
-            $('#zoom').val(zoom);
-        });
-
-        mymap.pm.addControls({
-            position: 'topleft',
-        });
-
-        $('#set-koordinat').on('click', function(){
-            mymap.pm.enableDraw('Marker', {
-                snappable: true,
-                snapDistance: 20,
-            });
-        });
-
-        $('#color-picker').on('change', function(){
-            var color = $(this).val();
-            mymap.pm.setPathOptions({
-                color: color,
-                fillColor: color,
-                fillOpacity: 0.4,
-            });
-        });
-
-        var line = [];
-
-        mymap.on('pm:drawstart', ({ workingLayer }) => {
-            workingLayer.on('pm:vertexadded', e => {
-                var koordinat = {};
-                koordinat['lat'] = e.latlng.lat;
-                koordinat['lng'] = e.latlng.lng;
-                line.push(
-                    koordinat
-                );
-            });
-        });
-
-        mymap.on('pm:create', e => {
-            let shape = e.shape;
-            if (shape == 'Marker') {
-                let koordinat_desa = "["+e.marker._latlng.lat+", "+e.marker._latlng.lng+"]";
-                $('#marker-desa').val(koordinat_desa);
-                mymap.pm.disableDraw('Marker', {
-                    snappable: true,
-                    snapDistance: 20,
+            },
+            disableEditMode: function () {
+                this.eachLayer(function (layer) {
+                    if (layer instanceof L.Polygon) {
+                        if (layer.options.id != null) {
+                            layer.pm.disable();
+                        }
+                    }
                 });
-            } else if(shape == 'Polygon'){
-                $('#batas-desa').val(JSON.stringify(line));
             }
         });
 
+        //render leaflet map with token
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
             maxZoom: 18,
@@ -160,6 +118,19 @@
             accessToken: 'pk.eyJ1IjoiZmlyZXJleDk3OSIsImEiOiJja2dobG1wanowNTl0MzNwY3Fld2hpZnJoIn0.YRQqomJr_RmnW3q57oNykw'
         }).addTo(mymap);
 
+        //set up geoman tools
+        mymap.pm.addControls({
+            position: 'topleft',
+            drawMarker: false,
+            drawCircleMarker: false,
+            drawPolyline: false,
+            drawRectangle: false,
+            drawCircle: false,
+            cutPolygon: false,
+            pinningOption: false,
+        });
+
+        //if page is load complete
         $(document).ready(function(){
             $('#desa').addClass('active');
             $('#zoom').val(mymap.getZoom());
@@ -172,13 +143,90 @@
             });
         });
 
+        //on zoom in or zoom out
+        mymap.on('zoomend', function() {
+            let zoom = mymap.getZoom();
+            $('#zoom').val(zoom);
+        });
+
+        //on edit mode button clicked
+        mymap.on('pm:globaleditmodetoggled', e => {
+            polygon = mymap.disableEditMode();
+        });
+
+        //if mark button is click
+        $('#set-koordinat').on('click', function(){
+            mymap.pm.enableDraw('Marker', {
+                snappable: true,
+                snapDistance: 20,
+            });
+        });
+
+        //on color change
+        $('#color-picker').on('change', function(){
+            var color = $(this).val();
+            mymap.pm.setPathOptions({
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.4,
+            });
+        });
+
+        //save koordinat in array
+        var line = [];
+        mymap.on('pm:drawstart', ({ workingLayer }) => {
+            workingLayer.on('pm:vertexadded', e => {
+                var koordinat = {};
+                koordinat['lat'] = e.latlng.lat;
+                koordinat['lng'] = e.latlng.lng;
+                line.push(
+                    koordinat
+                );
+            });
+        });
+
+        //on polygon create
+        mymap.on('pm:create', e => {
+            let shape = e.shape;
+            if (shape == 'Marker') {
+                let koordinat_desa = "["+e.marker._latlng.lat+", "+e.marker._latlng.lng+"]";
+                $('#marker-desa').val(koordinat_desa);
+                mymap.pm.disableDraw('Marker', {
+                    snappable: true,
+                    snapDistance: 20,
+                });
+            } else if(shape == 'Polygon'){
+                //on new shape created is on edit mode
+                e.layer.on('pm:update', polygon => {
+                    var koordinats = polygon.layer._latlngs;
+                    let koordinat = {};
+                    line = []
+                    koordinats[0].forEach(function(latlng){
+                        koordinat['lat'] = latlng.lat;
+                        koordinat['lng'] = latlng.lng;
+                        line.push({
+                            lat: latlng.lat,
+                            lng: latlng.lng
+                        });
+                    });
+                    $('#batas-desa').val(JSON.stringify(line));
+                });
+                $('#batas-desa').val(JSON.stringify(line));
+            }
+        });
+
+        //on remove layer
+        mymap.on('pm:remove', e => {
+            $('#batas-desa').val('');
+        });
+
+        //get desa's data from db
         function getAllDesa() {
             let url = '{{ route("map.get_all_desa") }}';
             $.ajax({
                 url : url,
                 method : 'GET',
                 success : function(response) {
-                    // console.log(response.desa);
                     for (let i = 0; i < response.desa.length; i++) {
                         createPolygon(response.desa[i]);
                     }
@@ -186,6 +234,7 @@
             });
         }
 
+        //create Polygon shape from db koordinate
         function createPolygon(desa) {
             var koor = jQuery.parseJSON(desa['batas_desa']);
             var pathCoords = connectTheDots(koor);
@@ -195,11 +244,10 @@
                 fillColor: desa['warna_batas_desa'],
                 fillOpacity: 0.4,
             }).addTo(mymap);
-
             pathLine.bindPopup(desa['nama_desa']);
-
         }
 
+        //connect the dots or koordinate
         function connectTheDots(data){
             var c = [];
             for(i in data) {
@@ -210,6 +258,7 @@
             return c;
         }
 
+        //when button submit click
         $('#btn-submit').on('click', function(){
             $('#form-submit').submit();
         });

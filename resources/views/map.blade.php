@@ -32,7 +32,14 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="card-title text-primary">Map</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="card-title text-primary">Map</h5>
+                                </div>
+                                <div class="col-md-6">
+                                    <a href="{{ route('login') }}" class="float-right btn btn-sm btn-success">Login</a>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div id="mapid"></div>
@@ -159,9 +166,9 @@
         function createMarkerSekolah(potensi) {
             let pop_up = '<p><strong>'+potensi['nama_sekolah']+'</strong><p>'+
                         '<hr style="margin-top : -15px;">'+
-                        '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Jenis Sekolah : '+potensi['jenis']+'</span></small></p>'+
-                        '<p style="margin-top : -15px;"><small> <i class="fas fa-user-tie"></i> <span>Tingkat : '+potensi['tingkat']+'</span></small></p>'+
-                        '<p style="margin-top : -15px;"><small> <i class="fas fa-user-tie"></i> <span>Alamat : '+potensi['alamat']+'</span></small></p>';
+                        '<p style="margin-top : -10px;"><small> <i class="fas fa-list"></i> <span>Jenis Sekolah : '+potensi['jenis']+'</span></small></p>'+
+                        '<p style="margin-top : -15px;"><small> <i class="fas fa-sort-amount-up-alt"></i> <span>Tingkat : '+potensi['tingkat']+'</span></small></p>'+
+                        '<p style="margin-top : -15px;"><small> <i class="fas fa-map-marker-alt"></i> <span>Alamat : '+potensi['alamat']+'</span></small></p>';
 
             var marker = L.marker([potensi['lat'], potensi['lng']], {
                 icon: iconSekolah,
@@ -173,7 +180,7 @@
             let pop_up = '<p><strong>'+potensi['nama_tempat_ibadah']+'</strong><p>'+
                         '<hr style="margin-top : -15px;">'+
                         '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Agama : '+potensi['agama']+'</span></small></p>'+
-                        '<p style="margin-top : -15px;"><small> <i class="fas fa-user-tie"></i> <span>Alamat : '+potensi['alamat']+'</span></small></p>';
+                        '<p style="margin-top : -15px;"><small> <i class="fas fa-map-marker-alt"></i> <span>Alamat : '+potensi['alamat']+'</span></small></p>';
 
             var marker = L.marker([potensi['lat'], potensi['lng']], {
                 icon: iconTempatIbadah,

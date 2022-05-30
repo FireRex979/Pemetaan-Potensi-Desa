@@ -2,12 +2,53 @@
 @section('title', 'Map')
 @push('css')
 <style>
-    #mapid { height: 500px; }
+    #mapid { height: 450px; }
+    .clusterSumberAir {
+        width: 40px;
+        height: 40px;
+        background-color: #dc2727;
+        text-align: center;
+        border-radius: 50%;
+        font-size: 24px;
+        color: #fff;
+    }
+    .clusterSekolah {
+        width: 40px;
+        height: 40px;
+        background-color: #08415d;
+        text-align: center;
+        border-radius: 50%;
+        font-size: 24px;
+        color: #fff;
+    }
+    .clusterTempatIbadah {
+        width: 40px;
+        height: 40px;
+        background-color: #8eb8ad;
+        text-align: center;
+        border-radius: 50%;
+        font-size: 24px;
+        color: #fff;
+    }
+    .btn-float {
+        position: fixed;
+        bottom: -4px;
+        right: 10px;
+        margin-bottom: 40px;
+        margin-right: 20px;
+    }
+    label {
+        font-size: .8em;
+    }
+    .dropdown-toggle::after {
+        display: none;
+    }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
 <script src='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js'></script>
 <link href='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet' />
 <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+<link rel="stylesheet" href="{{ asset('/assets/vendor/marker-cluster/MarkerCluster.css') }}">
 @endpush
 @section('content')
 <h1 class="h3 mb-2 text-gray-800">Manajemen Map</h1>
@@ -31,6 +72,13 @@
         </div>
     </div>
 </div>
+<div class="btn-float">
+    <div class="d-inline-flex">
+        <div class="clusterSumberAir mr-2" title="Kluster Sumber Air"></div>
+        <div class="clusterSekolah mr-2" title="Kluster Sekolah"></div>
+        <div class="clusterTempatIbadah mr-2" title="Kluster Tempat Ibadah"></div>
+    </div>
+</div>
 <div class="modal fade" id="add-modal-sumber-air" tabindex="-1" role="dialog" aria-labelledby="add-modal-label"
         aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -45,6 +93,7 @@
                 <form action="{{ route('sumber_air.store') }}" method="POST">
                     @csrf
                     <input type="hidden" value="2" name="potensi_id">
+                    <input type="hidden" class="id-desa" name="id_desa">
                     <div class="form-group">
                         <label for="">Nama Sumber Air</label>
                         <input type="text" class="form-control" required name="nama_sumber" placeholder="Masukkan nama sumber air">
@@ -130,6 +179,7 @@
             <div class="modal-body">
                 <form action="{{ route('sekolah.store') }}" method="POST">
                     @csrf
+                    <input type="hidden" class="id-desa" name="id_desa">
                     <input type="hidden" value="1" name="potensi_id">
                     <div class="form-group">
                         <label for="">Nama Sekolah</label>
@@ -243,6 +293,7 @@
             <div class="modal-body">
                 <form action="{{ route('tempat_ibadah.store') }}" method="POST">
                     @csrf
+                    <input type="hidden" class="id-desa" name="id_desa">
                     <input type="hidden" value="3" name="potensi_id">
                     <div class="form-group">
                         <label for="">Nama Tempat Ibadah</label>
@@ -399,12 +450,16 @@
 @push('js')
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
 <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+<script src="{{ asset('/assets/vendor/marker-cluster/leaflet.markercluster.js') }}"></script>
 <script>
+    //setup ajax header
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+
+    //setup the leaflet map
     var mymap = L.map('mapid').setView([-8.375319619905975, 115.18006704436591], 12);
     L.Map.include({
         getMarkerById: function (id) {
@@ -420,6 +475,82 @@
         }
     });
 
+    var clusterSumberAir = L.markerClusterGroup({
+        maxClusterRadius: 100,
+        iconCreateFunction: function (cluster) {
+            var clusterSumberAir = cluster.getAllChildMarkers();
+            var html = '<div class="clusterSumberAir">' + clusterSumberAir.length + '</div>';
+            return L.divIcon({ html: html, className: 'mycluster', iconSize: L.point(32, 32) });
+        },
+        //Disable all of the defaults:
+        spiderfyOnMaxZoom: false, showCoverageOnHover: false, zoomToBoundsOnClick: false
+    }).on('clustermouseover', function(c) {
+        let child = c.layer.getAllChildMarkers();
+        let list = '';
+        for(let i = 0; i < c.layer.getAllChildMarkers().length; i++) {
+            list = list + '<br>' + child[i].options.name + ' ('+child[i].options.village+')';
+        }
+        var popup = L.popup()
+            .setLatLng(c.layer.getLatLng())
+            .setContent('<strong>' + c.layer._childCount +' Sumber Air, Zoom untuk Melihat Detail : </strong>' + list)
+            .openOn(mymap);
+        }).on('clustermouseout',function(c){
+            mymap.closePopup();
+        }).on('clusterclick',function(c){
+            mymap.closePopup();
+        });
+
+    var clusterSekolah = L.markerClusterGroup({
+        maxClusterRadius: 100,
+        iconCreateFunction: function (cluster) {
+            var clusterSekolah = cluster.getAllChildMarkers();
+            var html = '<div class="clusterSekolah">' + clusterSekolah.length + '</div>';
+            return L.divIcon({ html: html, className: 'mycluster', iconSize: L.point(32, 32) });
+        },
+        //Disable all of the defaults:
+        spiderfyOnMaxZoom: false, showCoverageOnHover: false, zoomToBoundsOnClick: false
+    }).on('clustermouseover', function(c) {
+        let child = c.layer.getAllChildMarkers();
+        let list = '';
+        for(let i = 0; i < c.layer.getAllChildMarkers().length; i++) {
+            list = list + '<br>' + child[i].options.name + ' ('+child[i].options.village+')';
+        }
+        var popup = L.popup()
+            .setLatLng(c.layer.getLatLng())
+            .setContent('<strong>' + c.layer._childCount +' Sekolah, Zoom untuk Melihat Detail : </strong>' + list)
+            .openOn(mymap);
+        }).on('clustermouseout',function(c){
+            mymap.closePopup();
+        }).on('clusterclick',function(c){
+            mymap.closePopup();
+        });
+
+    var clusterTempatIbadah = L.markerClusterGroup({
+        maxClusterRadius: 100,
+        iconCreateFunction: function (cluster) {
+            var clusterTempatIbadah = cluster.getAllChildMarkers();
+            var html = '<div class="clusterTempatIbadah">' + clusterTempatIbadah.length + '</div>';
+            return L.divIcon({ html: html, className: 'mycluster', iconSize: L.point(32, 32) });
+        },
+        //Disable all of the defaults:
+        spiderfyOnMaxZoom: false, showCoverageOnHover: false, zoomToBoundsOnClick: false
+    }).on('clustermouseover', function(c) {
+        let child = c.layer.getAllChildMarkers();
+        let list = '';
+        for(let i = 0; i < c.layer.getAllChildMarkers().length; i++) {
+            list = list + '<br>' + child[i].options.name + ' ('+child[i].options.village+')';
+        }
+        var popup = L.popup()
+            .setLatLng(c.layer.getLatLng())
+            .setContent('<strong>' + c.layer._childCount +' Tempat Ibadah, Zoom untuk Melihat Detail : </strong>' + list)
+            .openOn(mymap);
+        }).on('clustermouseout',function(c){
+            mymap.closePopup();
+        }).on('clusterclick',function(c){
+            mymap.closePopup();
+        });
+
+    //render map from mapbox api
     L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
@@ -429,10 +560,7 @@
         accessToken: 'pk.eyJ1IjoiZmlyZXJleDk3OSIsImEiOiJja2dobG1wanowNTl0MzNwY3Fld2hpZnJoIn0.YRQqomJr_RmnW3q57oNykw'
     }).addTo(mymap);
 
-    mymap.pm.addControls({
-        position: 'topleft',
-    });
-
+    //get all desa's data from db
     function getAllDesa() {
         let url = '{{ route("map.get_all_desa") }}';
         $.ajax({
@@ -447,11 +575,13 @@
         });
     }
 
+    //create marker desa
     function createMarkerDesa(desa) {
         let latlng = JSON.parse(desa['marker_desa']);
         var marker = L.marker([latlng[0], latlng[1]]).addTo(mymap).bindPopup(desa['nama_desa']);
     }
 
+    //get all potensial desa data from db
     function getAllPotensi() {
         let url = '{{ route("map.get_sumber_desa") }}';
         $.ajax({
@@ -471,6 +601,7 @@
         });
     }
 
+    //icon sumber air potensial
     var iconSumberAir = L.icon({
         iconUrl: '/assets/img/waterfall.png',
         iconSize:     [24, 24], // size of the icon
@@ -480,6 +611,7 @@
         popupAnchor:  [0, -12] // point from which the popup should open relative to the iconAnchor
     });
 
+    //icon sekolah potensial
     var iconSekolah = L.icon({
         iconUrl: '/assets/img/school.png',
         iconSize:     [24, 24], // size of the icon
@@ -489,6 +621,7 @@
         popupAnchor:  [0, -12] // point from which the popup should open relative to the iconAnchor
     });
 
+    //icon tempat ibadah potensial
     var iconTempatIbadah = L.icon({
         iconUrl: '/assets/img/shinto.png',
         iconSize:     [24, 24], // size of the icon
@@ -498,49 +631,65 @@
         popupAnchor:  [0, -12] // point from which the popup should open relative to the iconAnchor
     });
 
+    //create marker sumber air
     function createMarkerSumberAir(potensi) {
         let pop_up = '<p><strong>'+potensi['nama_sumber']+'</strong><p>'+
                      '<hr style="margin-top : -15px;">'+
                      '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Debit Sumber Air : '+potensi['debit']+' lt/detik</span></small></p>'+
+                     '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Desa : '+potensi['nama_desa']+'</span></small></p>'+
                      '<p style="margin-top : -15px;"><small> <i class="fas fa-user-tie"></i> <span>Pengelola : '+potensi['pengelola']+'</span></small></p>'+
                      '<button class="btn btn-sm mr-1 btn-warning" onclick="editSumberAir('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;"><i class="fas fa-edit"></i></button><button onclick="deleteSumberAir('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>';
 
         var marker = L.marker([potensi['lat'], potensi['lng']], {
             icon: iconSumberAir,
-            id : potensi['id']
-        }).addTo(mymap).bindPopup(pop_up);
+            id : potensi['id'],
+            name : potensi['nama_sumber'],
+            village : potensi['nama_desa']
+        }).bindPopup(pop_up);
+        clusterSumberAir.addLayer(marker);
         onDragMarkerSumberAir(marker);
     }
 
+    //create marker sekolah
     function createMarkerSekolah(potensi) {
         let pop_up = '<p><strong>'+potensi['nama_sekolah']+'</strong><p>'+
                      '<hr style="margin-top : -15px;">'+
-                     '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Jenis Sekolah : '+potensi['jenis']+'</span></small></p>'+
-                     '<p style="margin-top : -15px;"><small> <i class="fas fa-user-tie"></i> <span>Tingkat : '+potensi['tingkat']+'</span></small></p>'+
-                     '<p style="margin-top : -15px;"><small> <i class="fas fa-user-tie"></i> <span>Alamat : '+potensi['alamat']+'</span></small></p>'+
+                     '<p style="margin-top : -10px;"><small> <i class="fas fa-list"></i> <span>Jenis Sekolah : '+potensi['jenis']+'</span></small></p>'+
+                     '<p style="margin-top : -15px;"><small> <i class="fas fa-sort-amount-up-alt"></i> <span>Tingkat : '+potensi['tingkat']+'</span></small></p>'+
+                     '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Desa : '+potensi['nama_desa']+'</span></small></p>'+
+                     '<p style="margin-top : -15px;"><small> <i class="fas fa-map-marker-alt"></i> <span>Alamat : '+potensi['alamat']+'</span></small></p>'+
                      '<button class="btn btn-sm mr-1 btn-warning" onclick="editSekolah('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;"><i class="fas fa-edit"></i></button><button onclick="deleteSekolah('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>';
 
         var marker = L.marker([potensi['lat'], potensi['lng']], {
             icon: iconSekolah,
-            id : potensi['id']
-        }).addTo(mymap).bindPopup(pop_up);
+            id : potensi['id'],
+            name : potensi['nama_sekolah'],
+            village : potensi['nama_desa'],
+        }).bindPopup(pop_up);
+        clusterSekolah.addLayer(marker);
         onDragMarkerSekolah(marker);
     }
 
+    //create marker tempat ibadah
     function createMarkerTempatIbadah(potensi) {
         let pop_up = '<p><strong>'+potensi['nama_tempat_ibadah']+'</strong><p>'+
                      '<hr style="margin-top : -15px;">'+
                      '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Agama : '+potensi['agama']+'</span></small></p>'+
-                     '<p style="margin-top : -15px;"><small> <i class="fas fa-user-tie"></i> <span>Alamat : '+potensi['alamat']+'</span></small></p>'+
+                     '<p style="margin-top : -15px;"><small> <i class="fas fa-map-marker-alt"></i> <span>Alamat : '+potensi['alamat']+'</span></small></p>'+
+                     '<p style="margin-top : -10px;"><small> <i class="fas fa-faucet"></i> <span>Desa : '+potensi['nama_desa']+'</span></small></p>'+
                      '<button class="btn btn-sm mr-1 btn-warning" onclick="editTempatIbadah('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;"><i class="fas fa-edit"></i></button><button onclick="deleteTempatIbadah('+"'"+potensi['id']+"'"+')" style="font-size : 8px; padding : 4px 8px;" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>';
 
         var marker = L.marker([potensi['lat'], potensi['lng']], {
             icon: iconTempatIbadah,
-            id : potensi['id']
-        }).addTo(mymap).bindPopup(pop_up);
+            id : potensi['id'],
+            name : potensi['nama_tempat_ibadah'],
+            village : potensi['nama_desa']
+        }).bindPopup(pop_up);
+        clusterTempatIbadah.addLayer(marker);
         onDragMarkerTempatIbadah(marker);
     }
 
+    //when maker sumber air is drag
     function onDragMarkerSumberAir(marker) {
         marker.on('pm:dragend', e => {
             let id = e.target.options.id;
@@ -561,6 +710,7 @@
         });
     }
 
+    //when marker sekolah is drag
     function onDragMarkerSekolah(marker) {
         marker.on('pm:dragend', e => {
             let id = e.target.options.id;
@@ -581,6 +731,7 @@
         });
     }
 
+    //when tempat ibadah drag
     function onDragMarkerTempatIbadah(marker) {
         marker.on('pm:dragend', e => {
             let id = e.target.options.id;
@@ -602,6 +753,7 @@
         });
     }
 
+    //create polygon desa
     function createPolygon(desa) {
         var koor = jQuery.parseJSON(desa['batas_desa']);
         var pathCoords = connectTheDots(koor);
@@ -626,6 +778,7 @@
                     '</div>';
 
         pathLine.on('click', function(e){
+            $('.id-desa').val(e.target.options.id);
             this.bindPopup(popup);
             $('.lat').val(e.latlng.lat);
             $('.lng').val(e.latlng.lng);
@@ -633,6 +786,7 @@
 
     }
 
+    //show modal potensial
     function createSekolah() {
         $('#add-modal-sekolah').modal('show');
     }
@@ -645,6 +799,7 @@
         $('#add-modal-tempat-ibadah').modal('show');
     }
 
+    //show modal edit potensial
     function editSumberAir(id) {
         let url = '/admin/sumber-air/show/'+id;
         let link = '/admin/sumber-air/update/'+id;
@@ -700,6 +855,7 @@
         })
     }
 
+    //show modal delete potensial
     function deleteSekolah(id) {
         $('#id-sekolah-delete').val(id);
         $('#delete-modal-sekolah').modal('show');
@@ -715,6 +871,7 @@
         $('#delete-modal-tempat-ibadah').modal('show');
     }
 
+    //connect the koordinate to array
     function connectTheDots(data){
         var c = [];
         for(i in data) {
@@ -725,10 +882,15 @@
         return c;
     }
 
+    mymap.addLayer( clusterSumberAir );
+    mymap.addLayer( clusterSekolah );
+    mymap.addLayer( clusterTempatIbadah );
+
     $(document).ready(function(){
         $('#map').addClass('active');
         getAllDesa();
         getAllPotensi();
     });
+
 </script>
 @endpush

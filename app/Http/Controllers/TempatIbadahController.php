@@ -11,6 +11,7 @@ class TempatIbadahController extends Controller
     {
         $tempat_ibadah = new TempatIbadah();
         $tempat_ibadah->potensi_id = $request->potensi_id;
+        $tempat_ibadah->desa_id = $request->id_desa;
         $tempat_ibadah->nama_tempat_ibadah = $request->nama_tempat_ibadah;
         $tempat_ibadah->lat = $request->lat;
         $tempat_ibadah->lng = $request->lng;

@@ -13,10 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Route::get('/test', function () {
     return view('layouts.admin');
 });
@@ -68,7 +64,7 @@ Route::group(['middleware' => 'auth'], function() {
 //Map
 Route::get('/admin/map/get-desa', 'MapController@getAllDesa')->name('map.get_all_desa');
 Route::get('/admin/map/get-potensi', 'MapController@getDataPotensi')->name('map.get_sumber_desa');
-Route::get('/map', 'HomeController@map')->name('map');
+Route::get('/', 'HomeController@map')->name('map');
 
 Auth::routes();
 
